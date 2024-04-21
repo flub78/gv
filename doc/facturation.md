@@ -22,7 +22,7 @@ Ce mécanisme permet d'appliquer des tarifs différents pour une période donné
 
 C'est quelqu'un connu du système qui peut-être facturé. Il peut aussi être propriétaire d'un planeur ce qui modifie les règles de facturation.
 
-Un membre a une catégorie de facturation: standard, moins-de-25-ans, senior, militaire, chomeur, étudiant, convention-CE, etc. 
+Un membre a une catégorie de facturation: standard, moins-de-25-ans, senior, militaire, chômeur, étudiant, convention-CE, etc. 
 
 ### Vol
 
@@ -66,7 +66,11 @@ vol=standard et altitude_rem > 350 et altitude_rem < 550
 
 ### Les actions
 
-Elles sont constituées d'un produit et d'une quantité.
+Des actions de facturation, elles sont constituées d'un produit et d'une quantité.
+le plus souvent la quantité est directement une durée ou quantité mais cela peut être une expression comme max (temps de vol en minute, 180)
+ou ((Alt rem - 500) / 100).
+
+Des actions de débit de compte de ticket.
 
 
 ## Les tickets
@@ -88,6 +92,39 @@ Ou ajouter une catégorie de facturation au pilote (pilote au forfait de telle c
 
 On voit que la facturation reste un problème complex.
 
-Et qu'on en arrive à imposer au trésorier de la décrire dans un language compliqué. C'était une des raisons de la configuration en php, au moins dans ce cas on disposait de la souplesse et de la puissance d'un vrai language de programmation.
+On en arrive à imposer au trésorier de la décrire dans un language spécifique. C'était une des raisons de la configuration en php, au moins dans ce cas on disposait de la souplesse et de la puissance d'un vrai language de programmation.
 
-La configuration par règles revient à la même complexité sans la même souplesse.
+Ce dont j'ai peur avec l'approche par règle c'est qu'on ne dispose pas de la souplesse des conditions imbriquées et qu'on soit obligé de multiplier les règles pour couvrir tout les cas.
+
+```
+    Si condition 1 alors
+        Si condition 2 alors
+            facturation produit X
+        Fin
+
+        Si condition 3 ou condition 4 alors
+            facturation produit Y
+        Sinon
+            facturation produit Z
+        Fin
+    Sinon
+        facturation produit A
+    Fin
+```
+
+traduit en règle cela donnerait:
+
+```
+si condition 1 et condition 2 facturation produit X
+Si condition1 et condition 3 facturation produit Y
+si condition 1 et condition 4 facturation produit Y
+si condition 1 et non condition 3 et non condition 4 facturation produit Z
+si non condition 1 facturation produit A
+
+```
+
+On voit que l'approche par règle est plus compliquée à exprimer et qu'il est plus difficile d'être sûr d'avoir couvert tout les cas... Et encore l'exemple ci-dessus est beaucoup plus simple que les cas réels.
+
+Peut-être que la bonne approche est de fournir toutes les primitives pour construire les conditions et les actions mais de garder une structure de conditions imbriquées. Soit textuelle soit à partir de bloc de construction comme scratch.
+
+Ou peut-être que la bonne approche est de fournir quand même des petits morceaux de php 
